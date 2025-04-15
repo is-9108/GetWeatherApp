@@ -1,0 +1,10 @@
+﻿@model GetWeatherApp.Models.ResultInfo
+
+<h2>Result</h2>
+<p>City： @Model.City</p>
+<p>最高気温：@Model.MaxTemperature℃</p>
+<p>最低気温：@Model.MinTemperature℃</p>
+<p>天気</p>
+<img src="@Model.Weather" alt="Weather Icon" />
+<p>降水確率：@Model.ChanceOfRain%</p>
+<p>花粉情報：@Model.Pollen</p>
