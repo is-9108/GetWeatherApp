@@ -139,6 +139,7 @@
     </Compile>
     <Compile Include="Models\ResultInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service\getLocal.cs" />
     <Compile Include="Service\getPollenInfo.cs" />
     <Compile Include="Service\getWeatherInfo.cs" />
   </ItemGroup>

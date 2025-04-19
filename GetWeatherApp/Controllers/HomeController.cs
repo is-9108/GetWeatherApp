@@ -7,6 +7,7 @@ using System.Web;
 using System.Web.Mvc;
 using GetWeatherApp.Models;
 using GetWeatherApp.Service;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace GetWeatherApp.Controllers
@@ -15,13 +16,15 @@ namespace GetWeatherApp.Controllers
     {
         private readonly getWeatherInfo _getWeatherInfo;
         private readonly getPollenInfo _getPollenInfo;
+        private readonly getLocal _getLocal;
 
-        public HomeController(getWeatherInfo getWeatherInfo, getPollenInfo getPollenInfo)
+        public HomeController(getWeatherInfo getWeatherInfo, getPollenInfo getPollenInfo, getLocal getLocalInfo)
         {
             _getWeatherInfo = getWeatherInfo;
             _getPollenInfo = getPollenInfo;
+            _getLocal = getLocalInfo;
         }
-        public HomeController() : this(new getWeatherInfo(new HttpClient()),new getPollenInfo(new HttpClient()))
+        public HomeController() : this(new getWeatherInfo(new HttpClient()),new getPollenInfo(new HttpClient()), new getLocal(new HttpClient()))
         {
             
         }
@@ -32,17 +35,22 @@ namespace GetWeatherApp.Controllers
             return View();
         }
 
-        public async Task<ActionResult> Result(string latitude, string longitude)
+        public async Task<ActionResult> Result(string city, string municipality)
         {
+            var localData = await _getLocal.GetLocalData(city, municipality);
+            var localJson = JArray.Parse(localData);
+            string _latitude = localJson[0]["geometry"]["coordinates"][1].ToString();
+            string _longitude = localJson[0]["geometry"]["coordinates"][0].ToString();
+            string _cityName = localJson[0]["properties"]["title"].ToString();
 
-            var weatherData = await _getWeatherInfo.GetWeather(latitude,longitude);
+            var weatherData = await _getWeatherInfo.GetWeather(_latitude,_longitude);
             var weatherJson = JObject.Parse(weatherData);
-            var pollenData = await _getPollenInfo.GetPollen(latitude, longitude);
+            var pollenData = await _getPollenInfo.GetPollen(_latitude, _longitude);
             var pollenJson = JObject.Parse(pollenData);
 
             var resultInfo = new ResultInfo
             {
-                City = weatherJson["location"]["name"].ToString(),
+                City = _cityName,
                 MaxTemperature = weatherJson["forecast"]["forecastday"][0]["day"]["maxtemp_c"].ToString(),
                 MinTemperature = weatherJson["forecast"]["forecastday"][0]["day"]["mintemp_c"].ToString(),
                 Weather = weatherJson["forecast"]["forecastday"][0]["day"]["condition"]["icon"].ToString(),
